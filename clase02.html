@@ -1489,6 +1489,9 @@ Enviado desde la clase interactiva ✨`;
   const waBtn = document.getElementById('waBtn');
   waBtn.addEventListener('click', async () => {
     waBtn.disabled = true;
+    // Abrimos la pestaña de forma síncrona (dentro del gesto del usuario)
+    // para que el navegador no la bloquee mientras se genera el token.
+    const waWindow = window.open('', '_blank');
     try{
       const nombre = (nameInput.value || '').trim() || 'Estudiante';
       const cedula = (cedInput.value || '').trim() || 'sin cédula';
@@ -1540,8 +1543,14 @@ ${detalle}
 
 Enviado desde la clase interactiva ✨`;
       const url = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(texto);
-      window.open(url, '_blank');
+      if (waWindow && !waWindow.closed){
+        waWindow.location.href = url;
+      } else {
+        // Si el navegador bloqueó la ventana, usamos la pestaña actual.
+        window.location.href = url;
+      }
     } catch(e){
+      if (waWindow && !waWindow.closed) waWindow.close();
       showToast('❌ Error generando el token cifrado');
       console.error(e);
     } finally {
